@@ -20,8 +20,8 @@ func Captcha() error {
 	})
 	global.Captcha.SetTextShadow(true)
 	global.Captcha.SetTextShadowPoint(captcha.Point{
-		X: 1,
-		Y: 1,
+		X: 3,
+		Y: 3,
 	})
 	global.Captcha.SetTextShadowColor("#ffffff")
 	global.Captcha.SetImageFontAlpha(1)
