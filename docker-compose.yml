@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+
+  app:
+    #image: ncr.pub/nyaone/nya-captcha:latest
+    build: .
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - internal_network
+      - external_network
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - "./config.yml:/app/config.yml:ro"
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - internal_network
+    volumes:
+      - "./redis:/data"
+
+networks:
+  internal_network:
+    internal: true
+  external_network:

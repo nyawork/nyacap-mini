@@ -1,0 +1,15 @@
+sites:
+  http://localhost:8001:
+    site_key: test
+    site_secret: test2
+captcha:
+  pending_valid_for: 5m
+  submit_valid_for: 2m
+  characters: ["你","好","呀","这","是","点","击","验","证","码","哟"]
+security:
+  ip_ban_period: 10m
+  captcha_request_cd: 1s
+  captcha_submit_cd: 3s
+system:
+  debug: true
+  redis: "redis://localhost:6379/0"
