@@ -16,19 +16,17 @@ import (
 )
 
 type CaptchaVerifyRequest struct {
-	// 模仿 recaptcha 的格式，方便后端迁移使用
-	SiteSecret string  `json:"secret"`   // 站点密钥
-	Key        string  `json:"response"` // 会话 key
-	IP         *string `json:"remoteip,omitempty"`
+	SiteSecret string `json:"site_secret"` // 站点密钥
+	Key        string `json:"key"`         // 会话 key
 
-	// 扩展
-	Site *string `json:"site"` // 站点 Origin
+	// 可选
+	Site *string `json:"site,omitempty"` // 站点 Origin
 }
 
 func Verify(ctx *gin.Context) {
 	var req CaptchaVerifyRequest
 	err := ctx.BindJSON(&req)
-	if err != nil {
+	if err != nil || req.SiteSecret == "" || req.Key == "" {
 		global.Logger.Errorf("请求数据格式化失败: %v", err)
 		ctx.Status(http.StatusBadRequest)
 		return
@@ -80,15 +78,6 @@ func Verify(ctx *gin.Context) {
 		global.Logger.Errorf("无法解码存储的验证码结果: %v", err)
 		ctx.Status(http.StatusInternalServerError)
 		return
-	}
-
-	// 比较 IP
-	if req.IP != nil {
-		if captchaResolvedState.IP != *req.IP {
-			ctx.JSON(http.StatusOK, types.CaptchaResolved{
-				Success: false,
-			})
-		}
 	}
 
 	// 比较 site

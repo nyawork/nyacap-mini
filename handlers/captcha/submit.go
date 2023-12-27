@@ -75,7 +75,7 @@ func Submit(ctx *gin.Context) {
 
 	// 比较请求来源
 	if captchaPendingState.Site != ctx.GetHeader("Origin") ||
-		captchaPendingState.IP != ctx.ClientIP() ||
+		//captchaPendingState.IP != ctx.ClientIP() || // 多出口时候 IP 确实有可能变化，暂时先不根据这个屏蔽
 		captchaPendingState.UserAgent != ctx.Request.UserAgent() {
 		// 请求来源变化了
 		ctx.Status(http.StatusForbidden)
@@ -111,12 +111,9 @@ func Submit(ctx *gin.Context) {
 	// 通过校验，记录结果
 	resolvedStateBytes, err := json.Marshal(types.CaptchaResolved{
 		Success:     true,
+		IP:          captchaPendingState.IP,
+		Site:        captchaPendingState.Site,
 		ChallengeTS: time.Now().Format(time.RFC3339),
-		Hostname:    ctx.Request.Host,
-		ErrorCodes:  nil,
-
-		IP:   captchaPendingState.IP,
-		Site: captchaPendingState.Site,
 	})
 	if err != nil {
 		global.Logger.Errorf("无法格式化验证码信息: %v", err)
