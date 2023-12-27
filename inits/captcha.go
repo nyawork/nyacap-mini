@@ -14,6 +14,26 @@ func Captcha() error {
 	global.Captcha = captcha.NewCaptcha()
 
 	// 初始化一些设定
+	initBasicConfigs()
+
+	//// 有效字符
+	err = global.Captcha.SetRangChars(config.Config.Captcha.Characters)
+	if err != nil {
+		return err
+	}
+
+	// 加载文件相关配置
+	err = loadFiles()
+	if err != nil {
+		return err
+	}
+
+	// 初始化完成
+	return nil
+
+}
+
+func initBasicConfigs() {
 	global.Captcha.SetRangCheckTextLen(captcha.RangeVal{
 		Max: 5,
 		Min: 3,
@@ -26,36 +46,16 @@ func Captcha() error {
 	global.Captcha.SetTextShadowColor("#ffffff")
 	global.Captcha.SetImageFontAlpha(1)
 	global.Captcha.SetTextRangFontColors([]string{
-		"#1e293b",
-		"#1f2937",
-		"#27272a",
-		"#262626",
-		"#292524",
-		"#991b1b",
-		"#9a3412",
-		"#92400e",
-		"#854d0e",
-		"#3f6212",
-		"#166534",
-		"#065f46",
-		"#115e59",
-		"#155e75",
-		"#075985",
-		"#1e40af",
-		"#3730a3",
-		"#5b21b6",
-		"#6b21a8",
-		"#86198f",
-		"#9d174d",
-		"#9f1239",
+		"#1e293b", "#1f2937", "#27272a", "#262626",
+		"#292524", "#991b1b", "#9a3412", "#92400e",
+		"#854d0e", "#3f6212", "#166534", "#065f46",
+		"#115e59", "#155e75", "#075985", "#1e40af",
+		"#3730a3", "#5b21b6", "#6b21a8", "#86198f",
+		"#9d174d", "#9f1239",
 	})
+}
 
-	//// 有效字符
-	err = global.Captcha.SetRangChars(config.Config.Captcha.Characters)
-	if err != nil {
-		return err
-	}
-
+func loadFiles() error {
 	// 获得当前工作目录，用于读取文件类配置
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -102,9 +102,7 @@ func Captcha() error {
 		global.Captcha.SetThumbBackground(thumbnailImages)
 	}
 
-	// 初始化完成
 	return nil
-
 }
 
 func listFileRecursive(root string) ([]string, error) {
