@@ -93,6 +93,8 @@ func Verify(ctx *gin.Context) {
 
 	// 比较 site
 	if captchaResolvedState.Site != site {
+		// ban IP
+		security.CooldownIP(captchaResolvedState.IP, consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
 		ctx.JSON(http.StatusOK, types.CaptchaResolved{
 			Success: false,
 		})
