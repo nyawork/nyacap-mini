@@ -6,7 +6,7 @@ import (
 )
 
 func Captcha(rg *gin.RouterGroup) {
-	rg.POST("/request", captcha.Request)
+	rg.GET("/request/:site_key", captcha.Request)
 	rg.POST("/submit", captcha.Submit)
 	rg.POST("/verify", captcha.Verify)
 }

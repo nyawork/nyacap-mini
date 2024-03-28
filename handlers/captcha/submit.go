@@ -26,7 +26,7 @@ type CaptchaSubmitRequest struct {
 }
 
 type CaptchaSubmitResponse struct {
-	Success bool `json:"success"`
+	Success bool `json:"s"`
 }
 
 func Submit(ctx *gin.Context) {
@@ -74,7 +74,7 @@ func Submit(ctx *gin.Context) {
 	}
 
 	// 比较请求来源
-	if captchaPendingState.Site != ctx.GetHeader("Origin") ||
+	if captchaPendingState.Origin != ctx.GetHeader("Origin") ||
 		//captchaPendingState.IP != ctx.ClientIP() || // 多出口时候 IP 确实有可能变化，暂时先不根据这个屏蔽
 		captchaPendingState.UserAgent != ctx.Request.UserAgent() {
 		// 请求来源变化了
@@ -98,7 +98,7 @@ func Submit(ctx *gin.Context) {
 			req.Dots[index].X, req.Dots[index].Y,
 			int64(dot.Dx), int64(dot.Dy),
 			int64(dot.Width), int64(dot.Height),
-			5,
+			1,
 		) {
 			// 点不对应
 			ctx.JSON(http.StatusOK, CaptchaSubmitResponse{
@@ -109,11 +109,13 @@ func Submit(ctx *gin.Context) {
 	}
 
 	// 通过校验，记录结果
+	timeStamp := time.Now().Format(time.RFC3339)
 	resolvedStateBytes, err := json.Marshal(types.CaptchaResolved{
 		Success:     true,
-		IP:          captchaPendingState.IP,
-		Site:        captchaPendingState.Site,
-		ChallengeTS: time.Now().Format(time.RFC3339),
+		IP:          &captchaPendingState.IP,
+		Origin:      &captchaPendingState.Origin,
+		ChallengeTS: &timeStamp,
+		Hostname:    &ctx.Request.Host,
 	})
 	if err != nil {
 		global.Logger.Errorf("无法格式化验证码信息: %v", err)

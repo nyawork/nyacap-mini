@@ -11,14 +11,11 @@ import (
 	"nya-captcha/global"
 	"nya-captcha/security"
 	"nya-captcha/types"
+	"nya-captcha/utils"
 	"time"
 )
 
-type CaptchaRequestRequest struct {
-	SiteKey string `json:"site_key"`
-}
-
-type CaptchaRequestResponse struct {
+type RequestResponse struct {
 	Key             string `json:"k"`
 	BigImageBase64  string `json:"b"`
 	ThumbnailBase64 string `json:"t"`
@@ -37,18 +34,12 @@ func Request(ctx *gin.Context) {
 		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_REQUEST, config.Config.Security.CaptchaSubmitCooldown)
 	}
 
-	var req CaptchaRequestRequest
-	err = ctx.BindJSON(&req)
-	if err != nil {
-		global.Logger.Errorf("请求数据格式化失败: %v", err)
-		ctx.Status(http.StatusBadRequest)
-		return
-	}
+	siteKey := ctx.Param("site_key")
 
 	// 验证站点公钥和 Origin 是否匹配
-	siteInfo, ok := config.Config.Sites[ctx.GetHeader("Origin")]
-	if !ok || siteInfo.SiteKey != req.SiteKey {
-		// 站点公钥不匹配， ban IP
+	siteInfo := findSiteBySiteKey(siteKey)
+	if siteInfo == nil || !utils.SliceExist(siteInfo.AllowedOrigins, ctx.GetHeader("Origin")) {
+		// 站点公钥不匹配或 Origin 未被允许， ban IP
 		ctx.Status(http.StatusForbidden)
 		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
 		return
@@ -63,7 +54,7 @@ func Request(ctx *gin.Context) {
 	}
 
 	pendingStateBytes, err := json.Marshal(types.CaptchaPending{
-		Site:      ctx.GetHeader("Origin"),
+		Origin:    ctx.GetHeader("Origin"),
 		IP:        ctx.ClientIP(),
 		UserAgent: ctx.Request.UserAgent(),
 		Dots:      dots,
@@ -87,11 +78,20 @@ func Request(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, &CaptchaRequestResponse{
+	ctx.JSON(http.StatusOK, &RequestResponse{
 		Key:             key,
 		BigImageBase64:  b64,
 		ThumbnailBase64: tb64,
 		ExpiresAt:       expireAt.Unix(),
 	})
 
+}
+
+func findSiteBySiteKey(siteKey string) *types.SiteInfo {
+	for _, siteInfo := range config.Config.Sites {
+		if siteKey == siteInfo.SiteKey {
+			return &siteInfo
+		}
+	}
+	return nil
 }

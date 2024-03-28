@@ -9,8 +9,12 @@ import (
 
 func CORS() gin.HandlerFunc {
 	var validOrigins []string
-	for origin := range config.Config.Sites {
-		validOrigins = append(validOrigins, origin)
+	for _, siteInfo := range config.Config.Sites {
+		for _, origin := range siteInfo.AllowedOrigins {
+			if !utils.SliceExist(validOrigins, origin) {
+				validOrigins = append(validOrigins, origin)
+			}
+		}
 	}
 
 	return func(ctx *gin.Context) {

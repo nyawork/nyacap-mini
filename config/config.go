@@ -1,12 +1,12 @@
 package config
 
-import "time"
+import (
+	"nya-captcha/types"
+	"time"
+)
 
 type cfgType struct {
-	Sites map[string]struct { // Origin as key
-		SiteKey    string `yaml:"site_key"`
-		SiteSecret string `yaml:"site_secret"`
-	} `yaml:"sites"`
+	Sites   []types.SiteInfo `yaml:"sites"`
 	Captcha struct {
 		PendingValidFor time.Duration `yaml:"pending_valid_for"` // 申请后的有效时间
 		SubmitValidFor  time.Duration `yaml:"submit_valid_for"`  // 提交后的会话有效时间

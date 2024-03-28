@@ -13,47 +13,30 @@ import (
 	"nya-captcha/global"
 	"nya-captcha/security"
 	"nya-captcha/types"
+	"nya-captcha/utils"
 )
 
 type CaptchaVerifyRequest struct {
-	SiteSecret string `json:"site_secret"` // 站点密钥
-	Key        string `json:"key"`         // 会话 key
-
-	// 可选
-	Site *string `json:"site,omitempty"` // 站点 Origin
+	SiteSecret string `form:"secret" binding:"required"`   // 站点密钥
+	Key        string `form:"response" binding:"required"` // 会话 key
 }
 
 func Verify(ctx *gin.Context) {
 	var req CaptchaVerifyRequest
-	err := ctx.BindJSON(&req)
+	err := ctx.Bind(&req)
 	if err != nil || req.SiteSecret == "" || req.Key == "" {
 		global.Logger.Errorf("请求数据格式化失败: %v", err)
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 
-	// 检查是否有 Site
-	var site string
-	if req.Site != nil {
-		// 尝试定位到对应的 site
-		siteInfo, ok := config.Config.Sites[*req.Site]
-		if !ok || siteInfo.SiteSecret != req.SiteSecret {
-			// 站点密钥不匹配， ban IP
-			ctx.Status(http.StatusForbidden)
-			security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
-			return
-		}
-		site = *req.Site
-	} else {
-		// 寻找一个私钥对得上的 site
-		var found bool
-		site, found = findSiteBySecret(req.SiteSecret)
-		if !found {
-			// 查无此站
-			ctx.Status(http.StatusForbidden)
-			security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
-			return
-		}
+	// 寻找一个私钥对得上的 site
+	siteInfo, found := findSiteBySecret(req.SiteSecret)
+	if !found {
+		// 查无此站
+		ctx.Status(http.StatusForbidden)
+		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
+		return
 	}
 
 	// 使用指定的 key 请求 redis
@@ -63,7 +46,10 @@ func Verify(ctx *gin.Context) {
 	).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			ctx.Status(http.StatusNotFound)
+			ctx.JSON(http.StatusOK, types.CaptchaResolved{
+				Success:    false,
+				ErrorCodes: []string{"timeout-or-duplicate"},
+			})
 		} else {
 			global.Logger.Errorf("验证码结果拉取失败: %v", err)
 			ctx.Status(http.StatusInternalServerError)
@@ -81,11 +67,12 @@ func Verify(ctx *gin.Context) {
 	}
 
 	// 比较 site
-	if captchaResolvedState.Site != site {
+	if !utils.SliceExist(siteInfo.AllowedOrigins, *captchaResolvedState.Origin) {
 		// ban IP
-		security.CooldownIP(captchaResolvedState.IP, consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
+		security.CooldownIP(*captchaResolvedState.IP, consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
 		ctx.JSON(http.StatusOK, types.CaptchaResolved{
-			Success: false,
+			Success:    false,
+			ErrorCodes: []string{"bad-request"},
 		})
 	}
 
@@ -94,11 +81,11 @@ func Verify(ctx *gin.Context) {
 
 }
 
-func findSiteBySecret(siteSecret string) (string, bool) {
-	for site, siteInfo := range config.Config.Sites {
+func findSiteBySecret(siteSecret string) (*types.SiteInfo, bool) {
+	for _, siteInfo := range config.Config.Sites {
 		if siteSecret == siteInfo.SiteSecret {
-			return site, true
+			return &siteInfo, true
 		}
 	}
-	return "", false
+	return nil, false
 }

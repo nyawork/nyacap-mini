@@ -1,7 +1,8 @@
 sites:
-  http://localhost:8001:
-    site_key: test
+  - site_key: test
     site_secret: test2
+    allowed_origins:
+      - http://localhost:8001
 captcha:
   pending_valid_for: 5m
   submit_valid_for: 2m
