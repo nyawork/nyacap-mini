@@ -30,15 +30,18 @@ type CaptchaSubmitResponse struct {
 }
 
 func Submit(ctx *gin.Context) {
-	isCoolingdown, err := security.CheckIPCD(ctx.ClientIP(), consts.IPCD_POOL_SUBMIT)
+	ip := ctx.ClientIP()
+	isCoolingdown, err := security.CheckIPCD(ip, consts.IPCD_POOL_SUBMIT)
 	if err != nil {
 		global.Logger.Errorf("检查 IP 提交冷却状态失败: %v", err)
 		ctx.Status(http.StatusInternalServerError)
 	} else if isCoolingdown {
+		global.Logger.Debugf("IP (%s) 处于 %s 冷却池中", ip, consts.IPCD_POOL_SUBMIT)
 		ctx.Status(http.StatusTooManyRequests)
 		return
 	} else {
-		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_SUBMIT, config.Config.Security.CaptchaSubmitCooldown)
+		global.Logger.Debugf("IP (%s) 没有问题，继续请求", ip)
+		security.CooldownIP(ip, consts.IPCD_POOL_SUBMIT, config.Config.Security.CaptchaSubmitCooldown)
 	}
 
 	var req CaptchaSubmitRequest
@@ -75,11 +78,11 @@ func Submit(ctx *gin.Context) {
 
 	// 比较请求来源
 	if captchaPendingState.Origin != ctx.GetHeader("Origin") ||
-		//captchaPendingState.IP != ctx.ClientIP() || // 多出口时候 IP 确实有可能变化，暂时先不根据这个屏蔽
+		//captchaPendingState.IP != ip || // 多出口时候 IP 确实有可能变化，暂时先不根据这个屏蔽
 		captchaPendingState.UserAgent != ctx.Request.UserAgent() {
 		// 请求来源变化了
 		ctx.Status(http.StatusForbidden)
-		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
+		security.CooldownIP(ip, consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
 		return
 	}
 

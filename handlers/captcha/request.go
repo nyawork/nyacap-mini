@@ -23,15 +23,18 @@ type RequestResponse struct {
 }
 
 func Request(ctx *gin.Context) {
-	isCoolingdown, err := security.CheckIPCD(ctx.ClientIP(), consts.IPCD_POOL_REQUEST)
+	ip := ctx.ClientIP()
+	isCoolingdown, err := security.CheckIPCD(ip, consts.IPCD_POOL_REQUEST)
 	if err != nil {
 		global.Logger.Errorf("检查 IP 请求冷却状态失败: %v", err)
 		ctx.Status(http.StatusInternalServerError)
 	} else if isCoolingdown {
+		global.Logger.Debugf("IP (%s) 处于 %s 冷却池中", ip, consts.IPCD_POOL_REQUEST)
 		ctx.Status(http.StatusTooManyRequests)
 		return
 	} else {
-		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_REQUEST, config.Config.Security.CaptchaSubmitCooldown)
+		global.Logger.Debugf("IP (%s) 没有问题，继续请求", ip)
+		security.CooldownIP(ip, consts.IPCD_POOL_REQUEST, config.Config.Security.CaptchaRequestCooldown)
 	}
 
 	siteKey := ctx.Param("site_key")
@@ -41,7 +44,7 @@ func Request(ctx *gin.Context) {
 	if siteInfo == nil || !utils.SliceExist(siteInfo.AllowedOrigins, ctx.GetHeader("Origin")) {
 		// 站点公钥不匹配或 Origin 未被允许， ban IP
 		ctx.Status(http.StatusForbidden)
-		security.CooldownIP(ctx.ClientIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
+		security.CooldownIP(ip, consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
 		return
 	}
 
@@ -55,7 +58,7 @@ func Request(ctx *gin.Context) {
 
 	pendingStateBytes, err := json.Marshal(types.CaptchaPending{
 		Origin:    ctx.GetHeader("Origin"),
-		IP:        ctx.ClientIP(),
+		IP:        ip,
 		UserAgent: ctx.Request.UserAgent(),
 		Dots:      dots,
 	})
