@@ -3,11 +3,6 @@ FROM golang:alpine AS Builder
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Install basic packages
-RUN apk add \
-    gcc \
-    g++
-
 # Copy go mod files only
 COPY go.mod .
 COPY go.sum .
@@ -21,7 +16,7 @@ COPY . .
 # Build image
 RUN go build -o app .
 
-FROM alpine:latest AS Runner
+FROM scratch AS Runner
 
 WORKDIR /app
 
