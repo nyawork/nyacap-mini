@@ -2,7 +2,7 @@
 
 ## 关于
 
-请参见文档: https://docs.nyacap.com/server/mini
+请参见文档: https://docs.nyacap.com/components/server/mini/
 
 ## 非常感谢
 
