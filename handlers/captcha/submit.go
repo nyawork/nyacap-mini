@@ -89,6 +89,7 @@ func Submit(ctx *gin.Context) {
 	// 初判长度
 	if len(captchaPendingState.Dots) != len(req.Dots) {
 		// 长度不一致
+		global.Logger.Debugf("验证结果长度不匹配：期待 %d ，得到 %d", len(captchaPendingState.Dots), len(req.Dots))
 		ctx.JSON(http.StatusOK, CaptchaSubmitResponse{
 			Success: false,
 		})
@@ -101,9 +102,10 @@ func Submit(ctx *gin.Context) {
 			req.Dots[index].X, req.Dots[index].Y,
 			int64(dot.Dx), int64(dot.Dy),
 			int64(dot.Width), int64(dot.Height),
-			1,
+			config.Config.Captcha.Padding,
 		) {
 			// 点不对应
+			global.Logger.Debugf("验证结果位置不对应")
 			ctx.JSON(http.StatusOK, CaptchaSubmitResponse{
 				Success: false,
 			})

@@ -11,6 +11,7 @@ type cfgType struct {
 		PendingValidFor time.Duration `yaml:"pending_valid_for"` // 申请后的有效时间
 		SubmitValidFor  time.Duration `yaml:"submit_valid_for"`  // 提交后的会话有效时间
 		Characters      []string      `yaml:"characters"`        // 有效字符
+		Padding         int64         `yaml:"padding"`           // 允许的误差范围
 	} `yaml:"captcha"`
 	Security struct {
 		IPBanPeriod            time.Duration `yaml:"ip_ban_period"`      // 请求不匹配时 ban IP 的时间

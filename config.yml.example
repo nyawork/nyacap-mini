@@ -7,6 +7,7 @@ captcha:
   pending_valid_for: 5m
   submit_valid_for: 2m
   characters: ["你","好","呀","这","是","点","击","验","证","码","哟"]
+  padding: 5
 security:
   ip_ban_period: 10m
   captcha_request_cd: 1s
