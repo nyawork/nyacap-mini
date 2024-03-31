@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 	"net/http"
 	"nya-captcha/config"
 	"nya-captcha/consts"
-	"nya-captcha/global"
+	g "nya-captcha/global"
 	"nya-captcha/security"
 	"nya-captcha/types"
 	"nya-captcha/utils"
@@ -22,66 +23,62 @@ type RequestResponse struct {
 	ExpiresAt       int64  `json:"e"`
 }
 
-func Request(ctx *gin.Context) {
-	ip := ctx.ClientIP()
+func Request(c echo.Context) error {
+	ip := c.RealIP()
 	isCoolingdown, err := security.CheckIPCD(ip, consts.IPCD_POOL_REQUEST)
 	if err != nil {
-		global.Logger.Errorf("检查 IP 请求冷却状态失败: %v", err)
-		ctx.Status(http.StatusInternalServerError)
+		g.Logger.Error("检查 IP 请求冷却状态失败", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	} else if isCoolingdown {
-		global.Logger.Debugf("IP (%s) 处于 %s 冷却池中", ip, consts.IPCD_POOL_REQUEST)
-		ctx.Status(http.StatusTooManyRequests)
-		return
+		g.Logger.Debug("IP 处于冷却池中", zap.String("ip", ip), zap.String("pool", consts.IPCD_POOL_REQUEST))
+		return echo.NewHTTPError(http.StatusTooManyRequests)
 	} else {
-		global.Logger.Debugf("IP (%s) 没有问题，继续请求", ip)
+		g.Logger.Debug("IP 没有问题，继续请求", zap.String("ip", ip))
 		security.CooldownIP(ip, consts.IPCD_POOL_REQUEST, config.Config.Security.CaptchaRequestCooldown)
 	}
 
-	siteKey := ctx.Param("site_key")
+	siteKey := c.Param("site_key")
 
 	// 验证站点公钥和 Origin 是否匹配
 	siteInfo := findSiteBySiteKey(siteKey)
-	if siteInfo == nil || !utils.SliceExist(siteInfo.AllowedOrigins, ctx.GetHeader("Origin")) {
+	origin := c.Request().Header.Get("Origin")
+	if siteInfo == nil || !utils.SliceExist(siteInfo.AllowedOrigins, origin) {
 		// 站点公钥不匹配或 Origin 未被允许， ban IP
-		ctx.Status(http.StatusForbidden)
 		security.CooldownIP(ip, consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
-		return
+		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
 	// 生成验证码
-	dots, b64, tb64, key, err := global.Captcha.Generate()
+	dots, b64, tb64, key, err := g.Captcha.Generate()
 	if err != nil {
-		global.Logger.Errorf("验证码创建失败: %v", err)
-		ctx.Status(http.StatusInternalServerError)
-		return
+		g.Logger.Error("验证码创建失败", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	pendingStateBytes, err := json.Marshal(types.CaptchaPending{
-		Origin:    ctx.GetHeader("Origin"),
+		Origin:    origin,
 		IP:        ip,
-		UserAgent: ctx.Request.UserAgent(),
+		UserAgent: c.Request().UserAgent(),
 		Dots:      dots,
 	})
 	if err != nil {
-		global.Logger.Errorf("无法格式化验证码信息: %v", err)
-		ctx.Status(http.StatusInternalServerError)
-		return
+		g.Logger.Error("无法格式化验证码信息", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	expireAt := time.Now().Add(config.Config.Captcha.PendingValidFor)
-	err = global.Redis.Set(
+	err = g.Redis.Set(
 		context.Background(),
 		fmt.Sprintf(consts.REDIS_KEY_REQUEST_SESSION, key),
 		pendingStateBytes,
 		config.Config.Captcha.PendingValidFor,
 	).Err()
 	if err != nil {
-		global.Logger.Errorf("无法保存验证码会话: %v", err)
-		ctx.Status(http.StatusInternalServerError)
-		return
+		g.Logger.Error("无法保存验证码会话", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	ctx.JSON(http.StatusOK, &RequestResponse{
+	return c.JSON(http.StatusOK, &RequestResponse{
 		Key:             key,
 		BigImageBase64:  b64,
 		ThumbnailBase64: tb64,

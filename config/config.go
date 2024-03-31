@@ -19,8 +19,9 @@ type cfgType struct {
 		CaptchaSubmitCooldown  time.Duration `yaml:"captcha_submit_cd"`  // 提交后再次提交的冷却时间
 	} `yaml:"security"`
 	System struct {
-		Debug bool   `yaml:"debug"`
-		Redis string `yaml:"redis"`
+		Debug  bool   `yaml:"debug"`
+		Redis  string `yaml:"redis"`
+		Listen string `yaml:"listen"`
 	} `yaml:"system"`
 }
 

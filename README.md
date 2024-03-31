@@ -13,8 +13,7 @@
 ### 其他依赖
 
 - [wenlng/go-captcha](https://github.com/wenlng/go-captcha)
-- [gin-gonic/gin](https://github.com/gin-gonic/gin)
-- [redis/go-redis](https://github.com/redis/go-redis)
+- [labstack/echo](https://github.com/labstack/echo)
 - [redis/go-redis](https://github.com/redis/go-redis)
 - [go.uber.org/zap](https://github.com/uber-go/zap)
 - [gopkg.in/yaml](https://github.com/go-yaml/yaml)

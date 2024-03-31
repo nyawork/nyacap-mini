@@ -1,12 +1,12 @@
 package public
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func HealthCheck(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
+func HealthCheck(c echo.Context) error {
+	return c.JSON(http.StatusOK, echo.Map{
 		"ok": true,
 	})
 }

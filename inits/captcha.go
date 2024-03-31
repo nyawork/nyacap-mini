@@ -3,7 +3,7 @@ package inits
 import (
 	"github.com/wenlng/go-captcha/captcha"
 	"nya-captcha/config"
-	"nya-captcha/global"
+	g "nya-captcha/global"
 	"os"
 	"path/filepath"
 )
@@ -11,13 +11,13 @@ import (
 func Captcha() error {
 	var err error
 
-	global.Captcha = captcha.NewCaptcha()
+	g.Captcha = captcha.NewCaptcha()
 
 	// 初始化一些设定
 	initBasicConfigs()
 
 	//// 有效字符
-	err = global.Captcha.SetRangChars(config.Config.Captcha.Characters)
+	err = g.Captcha.SetRangChars(config.Config.Captcha.Characters)
 	if err != nil {
 		return err
 	}
@@ -34,18 +34,18 @@ func Captcha() error {
 }
 
 func initBasicConfigs() {
-	global.Captcha.SetRangCheckTextLen(captcha.RangeVal{
+	g.Captcha.SetRangCheckTextLen(captcha.RangeVal{
 		Max: 5,
 		Min: 3,
 	})
-	global.Captcha.SetTextShadow(true)
-	global.Captcha.SetTextShadowPoint(captcha.Point{
+	g.Captcha.SetTextShadow(true)
+	g.Captcha.SetTextShadowPoint(captcha.Point{
 		X: 3,
 		Y: 3,
 	})
-	global.Captcha.SetTextShadowColor("#ffffff")
-	global.Captcha.SetImageFontAlpha(1)
-	global.Captcha.SetTextRangFontColors([]string{
+	g.Captcha.SetTextShadowColor("#ffffff")
+	g.Captcha.SetImageFontAlpha(1)
+	g.Captcha.SetTextRangFontColors([]string{
 		"#1e293b", "#1f2937", "#27272a", "#262626",
 		"#292524", "#991b1b", "#9a3412", "#92400e",
 		"#854d0e", "#3f6212", "#166534", "#065f46",
@@ -81,7 +81,7 @@ func loadFiles() error {
 		return err
 	}
 	if len(fontFiles) > 0 {
-		global.Captcha.SetFont(fontFiles)
+		g.Captcha.SetFont(fontFiles)
 	}
 
 	// 加载背景图片
@@ -90,7 +90,7 @@ func loadFiles() error {
 		return err
 	}
 	if len(backgroundImages) > 0 {
-		global.Captcha.SetBackground(backgroundImages)
+		g.Captcha.SetBackground(backgroundImages)
 	}
 
 	// 加载小图
@@ -99,7 +99,7 @@ func loadFiles() error {
 		return err
 	}
 	if len(thumbnailImages) > 0 {
-		global.Captcha.SetThumbBackground(thumbnailImages)
+		g.Captcha.SetThumbBackground(thumbnailImages)
 	}
 
 	return nil

@@ -1,44 +1,48 @@
 package main
 
 import (
+	"fmt"
+	"go.uber.org/zap"
 	"log"
-	"nya-captcha/global"
+	"nya-captcha/config"
+	g "nya-captcha/global"
 	"nya-captcha/inits"
+	"nya-captcha/injects"
 )
 
 func main() {
-	log.Println("System starting...")
+	log.Println(fmt.Sprintf("正在启动 NyaCap Server Mini (%s)...", injects.VERSION))
 
-	// Initialize config
+	// 初始化配置
 	if err := inits.Config(); err != nil {
-		log.Fatalln("Failed to load config:", err)
+		log.Fatalln("配置加载失败:", err)
 	}
 
-	// Initialize logger
+	// 初始化 logger
 	if err := inits.Logger(); err != nil {
-		log.Fatalln("Failed to load logger:", err)
+		log.Fatalln("Logger 初始化失败:", err)
 	}
 
-	global.Logger.Info("Logger initialized, switch to here.")
+	g.Logger.Info("Logger 初始化完成，执行切换。")
 
-	// Initialize redis
+	// 初始化 Redis
 	if err := inits.Redis(); err != nil {
-		global.Logger.Fatalf("Failed to load redis: %v", err)
+		g.Logger.Fatal("Redis 初始化失败", zap.Error(err))
 	}
 
-	// Initialize captcha
+	// 初始化验证码核心
 	if err := inits.Captcha(); err != nil {
-		global.Logger.Fatalf("Failed to load captcha: %v", err)
+		g.Logger.Fatal("验证码核心加载失败", zap.Error(err))
 	}
 
-	// Initializing Gin
-	engine := inits.WebEngine()
+	// 初始化 HTTP Server
+	e := inits.WebEngine()
 
-	global.Logger.Info("Initialization complete.")
+	g.Logger.Info("初始化完成")
 
 	// Start
-	global.Logger.Info("Service starting...")
-	if err := engine.Run(); err != nil {
-		global.Logger.Fatalf("Failed to start service: %v", err)
+	g.Logger.Info("Service starting...")
+	if err := e.Start(config.Config.System.Listen); err != nil {
+		g.Logger.Fatal("服务启动失败", zap.Error(err))
 	}
 }

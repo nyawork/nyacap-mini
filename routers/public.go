@@ -1,10 +1,10 @@
 package routers
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"nya-captcha/handlers/public"
 )
 
-func Public(rg *gin.RouterGroup) {
+func Public(rg *echo.Group) {
 	rg.GET("/healthcheck", public.HealthCheck)
 }
