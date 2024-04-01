@@ -3,8 +3,8 @@ package middlewares
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"nya-captcha/config"
-	"nya-captcha/utils"
+	"nyacap-mini/config"
+	"nyacap-mini/utils"
 )
 
 func CORS() echo.MiddlewareFunc {

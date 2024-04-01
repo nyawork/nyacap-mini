@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"log"
-	"nya-captcha/config"
-	g "nya-captcha/global"
-	"nya-captcha/inits"
-	"nya-captcha/injects"
+	"nyacap-mini/config"
+	g "nyacap-mini/global"
+	"nyacap-mini/inits"
+	"nyacap-mini/injects"
 )
 
 func main() {

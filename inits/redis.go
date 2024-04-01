@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"nya-captcha/config"
-	g "nya-captcha/global"
+	"nyacap-mini/config"
+	g "nyacap-mini/global"
 	"time"
 )
 

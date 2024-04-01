@@ -3,8 +3,8 @@ package security
 import (
 	"context"
 	"fmt"
-	"nya-captcha/consts"
-	g "nya-captcha/global"
+	"nyacap-mini/consts"
+	g "nyacap-mini/global"
 )
 
 func CheckIPCD(ip string, pool string) (bool, error) {

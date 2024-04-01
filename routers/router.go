@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/labstack/echo/v4"
-	"nya-captcha/middlewares"
+	"nyacap-mini/middlewares"
 )
 
 func R(e *echo.Echo) {

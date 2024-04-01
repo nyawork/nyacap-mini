@@ -7,12 +7,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"net/http"
-	"nya-captcha/config"
-	"nya-captcha/consts"
-	g "nya-captcha/global"
-	"nya-captcha/security"
-	"nya-captcha/types"
-	"nya-captcha/utils"
+	"nyacap-mini/config"
+	"nyacap-mini/consts"
+	g "nyacap-mini/global"
+	"nyacap-mini/security"
+	"nyacap-mini/types"
+	"nyacap-mini/utils"
 	"time"
 )
 

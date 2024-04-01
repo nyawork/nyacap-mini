@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
-	g "nya-captcha/global"
+	g "nyacap-mini/global"
 )
 
 func LogValues(_ echo.Context, v middleware.RequestLoggerValues) error {

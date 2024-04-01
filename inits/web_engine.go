@@ -3,8 +3,8 @@ package inits
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"nya-captcha/middlewares"
-	"nya-captcha/routers"
+	"nyacap-mini/middlewares"
+	"nyacap-mini/routers"
 )
 
 func WebEngine() *echo.Echo {

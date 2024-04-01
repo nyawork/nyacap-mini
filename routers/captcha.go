@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/labstack/echo/v4"
-	"nya-captcha/handlers/captcha"
+	"nyacap-mini/handlers/captcha"
 )
 
 func Captcha(rg *echo.Group) {

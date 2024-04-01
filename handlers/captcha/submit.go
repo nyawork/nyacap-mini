@@ -10,11 +10,11 @@ import (
 	"github.com/wenlng/go-captcha/captcha"
 	"go.uber.org/zap"
 	"net/http"
-	"nya-captcha/config"
-	"nya-captcha/consts"
-	g "nya-captcha/global"
-	"nya-captcha/security"
-	"nya-captcha/types"
+	"nyacap-mini/config"
+	"nyacap-mini/consts"
+	g "nyacap-mini/global"
+	"nyacap-mini/security"
+	"nyacap-mini/types"
 	"time"
 )
 

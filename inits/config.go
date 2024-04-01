@@ -2,7 +2,7 @@ package inits
 
 import (
 	"gopkg.in/yaml.v3"
-	"nya-captcha/config"
+	"nyacap-mini/config"
 	"os"
 )
 

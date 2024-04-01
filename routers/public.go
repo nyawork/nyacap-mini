@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/labstack/echo/v4"
-	"nya-captcha/handlers/public"
+	"nyacap-mini/handlers/public"
 )
 
 func Public(rg *echo.Group) {

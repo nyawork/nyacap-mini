@@ -2,8 +2,8 @@ package inits
 
 import (
 	"github.com/wenlng/go-captcha/captcha"
-	"nya-captcha/config"
-	g "nya-captcha/global"
+	"nyacap-mini/config"
+	g "nyacap-mini/global"
 	"os"
 	"path/filepath"
 )

@@ -4,9 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"net/http"
-	"nya-captcha/consts"
-	g "nya-captcha/global"
-	"nya-captcha/security"
+	"nyacap-mini/consts"
+	g "nyacap-mini/global"
+	"nyacap-mini/security"
 )
 
 func IPBan() echo.MiddlewareFunc {

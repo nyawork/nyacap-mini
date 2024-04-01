@@ -3,8 +3,8 @@ package inits
 import (
 	"fmt"
 	"go.uber.org/zap"
-	"nya-captcha/config"
-	g "nya-captcha/global"
+	"nyacap-mini/config"
+	g "nyacap-mini/global"
 )
 
 func Logger() error {

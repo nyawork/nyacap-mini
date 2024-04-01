@@ -1,7 +1,7 @@
 package config
 
 import (
-	"nya-captcha/types"
+	"nyacap-mini/types"
 	"time"
 )
 
