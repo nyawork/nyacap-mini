@@ -18,20 +18,20 @@ import (
 )
 
 type CaptchaVerifyRequest struct {
-	SiteSecret string `form:"secret" binding:"required"`   // 站点密钥
-	Key        string `form:"response" binding:"required"` // 会话 key
+	SecretKey string `form:"secret" binding:"required"`   // 站点密钥
+	Key       string `form:"response" binding:"required"` // 会话 key
 }
 
 func Verify(c echo.Context) error {
 	var req CaptchaVerifyRequest
 	err := c.Bind(&req)
-	if err != nil || req.SiteSecret == "" || req.Key == "" {
+	if err != nil || req.SecretKey == "" || req.Key == "" {
 		g.Logger.Error("请求数据格式化失败", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
 	// 寻找一个私钥对得上的 site
-	siteInfo, found := findSiteBySecret(req.SiteSecret)
+	siteInfo, found := findSiteBySecret(req.SecretKey)
 	if !found {
 		// 查无此站
 		security.CooldownIP(c.RealIP(), consts.IPCD_POOL_BAN, config.Config.Security.IPBanPeriod)
@@ -80,7 +80,7 @@ func Verify(c echo.Context) error {
 
 func findSiteBySecret(siteSecret string) (*types.SiteInfo, bool) {
 	for _, siteInfo := range config.Config.Sites {
-		if siteSecret == siteInfo.SiteSecret {
+		if siteSecret == siteInfo.SecretKey {
 			return &siteInfo, true
 		}
 	}

@@ -1,6 +1,6 @@
 sites:
   - site_key: test
-    site_secret: test2
+    secret_key: test2
     allowed_origins:
       - http://localhost:8001
 captcha:
