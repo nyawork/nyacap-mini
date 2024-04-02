@@ -12,7 +12,6 @@ func R(e *echo.Echo) {
 
 	// Captcha
 	captchaApi := e.Group("/captcha")
-	captchaApi.Use(middlewares.CORS())
 	captchaApi.Use(middlewares.IPBan())
 	Captcha(captchaApi)
 }
