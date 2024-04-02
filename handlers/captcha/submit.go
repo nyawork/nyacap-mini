@@ -27,7 +27,8 @@ type CaptchaSubmitRequest struct {
 }
 
 type CaptchaSubmitResponse struct {
-	Success bool `json:"s"`
+	Success   bool  `json:"s"`
+	ExpiresAt int64 `json:"e"`
 }
 
 func Submit(c echo.Context) error {
@@ -121,6 +122,7 @@ func Submit(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
+	expireAt := time.Now().Add(config.Config.Captcha.SubmitValidFor)
 	err = g.Redis.Set(
 		context.Background(),
 		fmt.Sprintf(consts.REDIS_KEY_RESOLVED_SESSION, req.Key),
@@ -133,7 +135,8 @@ func Submit(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, CaptchaSubmitResponse{
-		Success: true,
+		Success:   true,
+		ExpiresAt: expireAt.Unix(),
 	})
 
 }
