@@ -35,8 +35,8 @@ func Captcha() error {
 
 func initBasicConfigs() {
 	g.Captcha.SetRangCheckTextLen(captcha.RangeVal{
-		Max: 5,
-		Min: 3,
+		Max: config.Config.Captcha.CheckTextLen.Max,
+		Min: config.Config.Captcha.CheckTextLen.Min,
 	})
 	g.Captcha.SetTextShadow(true)
 	g.Captcha.SetTextShadowPoint(captcha.Point{

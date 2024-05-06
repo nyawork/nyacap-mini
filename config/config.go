@@ -12,6 +12,10 @@ type cfgType struct {
 		SubmitValidFor  time.Duration `yaml:"submit_valid_for"`  // 提交后的会话有效时间
 		Characters      []string      `yaml:"characters"`        // 有效字符
 		Padding         int64         `yaml:"padding"`           // 允许的误差范围
+		CheckTextLen    struct {
+			Min int `yaml:"min"`
+			Max int `yaml:"max"`
+		} `yaml:"check_text_len"` // 检查字符数量
 	} `yaml:"captcha"`
 	Security struct {
 		IPBanPeriod            time.Duration `yaml:"ip_ban_period"`      // 请求不匹配时 ban IP 的时间
